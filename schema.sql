@@ -8,6 +8,10 @@ CREATE TABLE bookmarks (
   FOREIGN KEY(parent_id) REFERENCES bookmarks(id)
 );
 
+CREATE UNIQUE INDEX parent_unique ON bookmarks (
+  ifnull(parent_id, 0)
+);
+
 INSERT INTO bookmarks (url) VALUES ("google");
 INSERT INTO bookmarks (url, parent_id) VALUES ("yahoo", 1);
 INSERT INTO bookmarks (url, parent_id) VALUES ("bing", 2);
