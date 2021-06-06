@@ -1,4 +1,5 @@
 PRAGMA foreign_keys = ON;
+SELECT load_extension("sha1");
 
 CREATE TABLE bookmarks (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
