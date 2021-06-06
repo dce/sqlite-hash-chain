@@ -2,27 +2,36 @@ PRAGMA foreign_keys = ON;
 SELECT load_extension("sha1");
 
 CREATE TABLE bookmarks (
-  id TEXT NOT NULL UNIQUE CHECK(id = sha1(url || parent_id)),
-  parent_id TEXT,
+  id INTEGER PRIMARY KEY,
+  signature TEXT NOT NULL UNIQUE CHECK(signature = sha1(url || parent)),
+  parent TEXT,
   url TEXT NOT NULL UNIQUE,
-  FOREIGN KEY(parent_id) REFERENCES bookmarks(id)
+  FOREIGN KEY(parent) REFERENCES bookmarks(signature)
 );
-
-/* CREATE TRIGGER hash_chain_check */
-/* BEFORE INSERT ON bookmarks */
-/* BEGIN */
-/*   SELECT RAISE(FAIL, "signature invalid") */
-/*   FROM bookmarks */
-/*   WHERE id = NEW.parent_id */
-/*   AND NEW.signature != sha1(NEW.url || signature); */
-/* END; */
 
 CREATE UNIQUE INDEX parent_unique ON bookmarks (
-  ifnull(parent_id, "")
+  ifnull(parent, "")
 );
 
-INSERT INTO bookmarks (url, id) VALUES ("google", sha1("google"));
+INSERT INTO bookmarks (url, signature) VALUES ("google", sha1("google"));
 
-/* INSERT INTO bookmarks (url, signature, parent_id) VALUES ("yahoo", sha1("yahoo" || (SELECT signature FROM bookmarks WHERE id = 1)) , 1); */
-/* INSERT INTO bookmarks (url, signature, parent_id) VALUES ("bing", sha1("bing" || (SELECT signature FROM bookmarks WHERE id = 2)), 2); */
-/* INSERT INTO bookmarks (url, signature, parent_id) VALUES ("duckduckgo", sha1("duckduckgo" || (SELECT signature FROM bookmarks WHERE id = 3)), 3); */
+WITH p AS (SELECT signature FROM bookmarks ORDER BY id DESC LIMIT 1)
+INSERT INTO bookmarks (url, parent, signature) VALUES (
+  "yahoo",
+  (SELECT signature FROM p),
+  sha1("yahoo" || (SELECT signature FROM p))
+);
+
+WITH p AS (SELECT signature FROM bookmarks ORDER BY id DESC LIMIT 1)
+INSERT INTO bookmarks (url, parent, signature) VALUES (
+  "bing",
+  (SELECT signature FROM p),
+  sha1("bing" || (SELECT signature FROM p))
+);
+
+WITH p AS (SELECT signature FROM bookmarks ORDER BY id DESC LIMIT 1)
+INSERT INTO bookmarks (url, parent, signature) VALUES (
+  "duckduckgo",
+  (SELECT signature FROM p),
+  sha1("duckduckgo" || (SELECT signature FROM p))
+);
