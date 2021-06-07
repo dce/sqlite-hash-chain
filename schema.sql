@@ -29,3 +29,17 @@ WITH parent AS (SELECT signature FROM bookmarks ORDER BY id DESC LIMIT 1)
 INSERT INTO bookmarks (url, parent, signature) VALUES (
   "duckduckgo", (SELECT signature FROM parent), sha1("duckduckgo" || (SELECT signature FROM parent))
 );
+
+WITH tmp(id, url, parent, signature) AS (VALUES
+  (3, "altavista",
+    "64633167b8e44cb833fbfa349731d8a68e942ebc",
+    sha1("altavista" || "64633167b8e44cb833fbfa349731d8a68e942ebc")),
+  (4, "duckduckgo",
+    sha1("altavista" || "64633167b8e44cb833fbfa349731d8a68e942ebc"),
+    sha1("duckduckgo" || sha1("altavista" || "64633167b8e44cb833fbfa349731d8a68e942ebc")))
+)
+UPDATE bookmarks
+SET url = (SELECT url FROM tmp WHERE tmp.id = bookmarks.id),
+    parent = (SELECT parent FROM tmp WHERE tmp.id = bookmarks.id),
+    signature = (SELECT signature FROM tmp WHERE tmp.id = bookmarks.id)
+WHERE id IN (SELECT id FROM tmp);
