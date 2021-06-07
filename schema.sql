@@ -3,7 +3,8 @@ SELECT load_extension("sha1");
 
 CREATE TABLE bookmarks (
   id INTEGER PRIMARY KEY,
-  signature TEXT NOT NULL UNIQUE CHECK(signature = sha1(url || COALESCE(parent, ""))),
+  signature TEXT NOT NULL UNIQUE
+    CHECK(signature = sha1(url || COALESCE(parent, ""))),
   parent TEXT,
   url TEXT NOT NULL UNIQUE,
   FOREIGN KEY(parent) REFERENCES bookmarks(signature)
