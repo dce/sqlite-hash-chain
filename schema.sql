@@ -44,3 +44,17 @@ SET url = (SELECT url FROM tmp WHERE tmp.id = bookmarks.id),
     parent = (SELECT parent FROM tmp WHERE tmp.id = bookmarks.id),
     signature = (SELECT signature FROM tmp WHERE tmp.id = bookmarks.id)
 WHERE id IN (SELECT id FROM tmp);
+
+WITH RECURSIVE
+  t1(url, parent, old_signature, signature) AS (
+    SELECT "askjeeves", parent, signature, sha1("askjeeves" || COALESCE(parent, ""))
+    FROM bookmarks WHERE id = 2
+    UNION
+    SELECT t2.url, t1.signature, t2.signature, sha1(t2.url || t1.signature)
+    FROM bookmarks AS t2, t1 WHERE t2.parent = t1.old_signature
+  )
+UPDATE bookmarks
+SET url = (SELECT url FROM t1 WHERE t1.old_signature = bookmarks.signature),
+    parent = (SELECT parent FROM t1 WHERE t1.old_signature = bookmarks.signature),
+    signature = (SELECT signature FROM t1 WHERE t1.old_signature = bookmarks.signature)
+WHERE signature IN (SELECT old_signature FROM t1);
