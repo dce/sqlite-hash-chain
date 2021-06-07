@@ -1,5 +1,6 @@
 PRAGMA foreign_keys = ON;
 SELECT load_extension("sha1");
+.mode table
 
 CREATE TABLE bookmarks (
   id INTEGER PRIMARY KEY,
@@ -31,6 +32,8 @@ INSERT INTO bookmarks (url, parent, signature) VALUES (
   "duckduckgo", (SELECT signature FROM parent), sha1("duckduckgo" || (SELECT signature FROM parent))
 );
 
+SELECT * FROM bookmarks;
+
 WITH tmp(id, url, parent, signature) AS (VALUES
   (3, "altavista",
     "64633167b8e44cb833fbfa349731d8a68e942ebc",
@@ -45,6 +48,8 @@ SET url = (SELECT url FROM tmp WHERE tmp.id = bookmarks.id),
     signature = (SELECT signature FROM tmp WHERE tmp.id = bookmarks.id)
 WHERE id IN (SELECT id FROM tmp);
 
+SELECT * FROM bookmarks;
+
 WITH RECURSIVE
   t1(url, parent, old_signature, signature) AS (
     SELECT "askjeeves", parent, signature, sha1("askjeeves" || COALESCE(parent, ""))
@@ -58,3 +63,5 @@ SET url = (SELECT url FROM t1 WHERE t1.old_signature = bookmarks.signature),
     parent = (SELECT parent FROM t1 WHERE t1.old_signature = bookmarks.signature),
     signature = (SELECT signature FROM t1 WHERE t1.old_signature = bookmarks.signature)
 WHERE signature IN (SELECT old_signature FROM t1);
+
+SELECT * FROM bookmarks;
