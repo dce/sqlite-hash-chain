@@ -15,24 +15,28 @@ CREATE UNIQUE INDEX parent_unique ON bookmarks (
   ifnull(parent, "")
 );
 
+/* INSERT SOME DATA */
+
 INSERT INTO bookmarks (url, signature) VALUES ("google", sha1("google"));
 
-WITH parent AS (SELECT signature FROM bookmarks ORDER BY id DESC LIMIT 1)
+WITH head AS (SELECT signature FROM bookmarks ORDER BY id DESC LIMIT 1)
 INSERT INTO bookmarks (url, parent, signature) VALUES (
-  "yahoo", (SELECT signature FROM parent), sha1("yahoo" || (SELECT signature FROM parent))
+  "yahoo", (SELECT signature FROM head), sha1("yahoo" || (SELECT signature FROM head))
 );
 
-WITH parent AS (SELECT signature FROM bookmarks ORDER BY id DESC LIMIT 1)
+WITH head AS (SELECT signature FROM bookmarks ORDER BY id DESC LIMIT 1)
 INSERT INTO bookmarks (url, parent, signature) VALUES (
-  "bing", (SELECT signature FROM parent), sha1("bing" || (SELECT signature FROM parent))
+  "bing", (SELECT signature FROM head), sha1("bing" || (SELECT signature FROM head))
 );
 
-WITH parent AS (SELECT signature FROM bookmarks ORDER BY id DESC LIMIT 1)
+WITH head AS (SELECT signature FROM bookmarks ORDER BY id DESC LIMIT 1)
 INSERT INTO bookmarks (url, parent, signature) VALUES (
-  "duckduckgo", (SELECT signature FROM parent), sha1("duckduckgo" || (SELECT signature FROM parent))
+  "duckduckgo", (SELECT signature FROM head), sha1("duckduckgo" || (SELECT signature FROM head))
 );
 
 SELECT * FROM bookmarks;
+
+/* DEMONSTRATE UPDATES */
 
 WITH tmp(id, url, parent, signature) AS (VALUES
   (3, "altavista",
