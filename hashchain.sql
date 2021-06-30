@@ -36,21 +36,7 @@ INSERT INTO bookmarks (url, parent, signature) VALUES (
 
 SELECT * FROM bookmarks;
 
-/* DEMONSTRATE UPDATES */
-
-WITH tmp(id, url, parent, signature) AS (VALUES
-  (3, "altavista",
-    "64633167b8e44cb833fbfa349731d8a68e942ebc",
-    sha1("altavista" || "64633167b8e44cb833fbfa349731d8a68e942ebc")),
-  (4, "duckduckgo",
-    sha1("altavista" || "64633167b8e44cb833fbfa349731d8a68e942ebc"),
-    sha1("duckduckgo" || sha1("altavista" || "64633167b8e44cb833fbfa349731d8a68e942ebc")))
-)
-UPDATE bookmarks
-SET url = (SELECT url FROM tmp WHERE tmp.id = bookmarks.id),
-    parent = (SELECT parent FROM tmp WHERE tmp.id = bookmarks.id),
-    signature = (SELECT signature FROM tmp WHERE tmp.id = bookmarks.id)
-WHERE id IN (SELECT id FROM tmp);
+UPDATE bookmarks SET url = "altavista", signature = sha1("altavista" || parent) WHERE id = 4;
 
 SELECT * FROM bookmarks;
 
