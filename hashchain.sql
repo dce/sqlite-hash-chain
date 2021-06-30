@@ -1,5 +1,5 @@
 PRAGMA foreign_keys = ON;
-SELECT load_extension("sha1");
+SELECT load_extension("./sha1");
 .mode table
 
 CREATE TABLE bookmarks (
